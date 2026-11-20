@@ -9,7 +9,7 @@ const rcKeys=Object.fromEntries(Object.entries(rcShortcuts).map(([action,[label,
 Object.assign(rcKeys,{ArrowUp:'前进',ArrowDown:'后退',ArrowLeft:'左转',ArrowRight:'右转'});
 const rcMovement=['前进','后退','向左横移','向右横移','左转','右转'];
 let rcHeld=null;
-function rcKeyTarget(e){return ['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable||e.isComposing||e.ctrlKey||e.altKey||e.metaKey||document.querySelector('#modal-root')?.children.length}
+function rcKeyTarget(e){return (typeof setupScreen!=='undefined'&&setupScreen!=='control')||['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable||e.isComposing||e.ctrlKey||e.altKey||e.metaKey||document.querySelector('#modal-root')?.children.length}
 document.addEventListener('keydown',e=>{if(rcKeyTarget(e))return;if(e.code==='Space'){if(!connected||e.repeat)return;e.preventDefault();rcHeld=null;handlers.rcStop();return}const command=rcKeys[e.code];if(!command)return;e.preventDefault();if(e.repeat||!ready()||!s.verified)return;if(rcMovement.includes(command))rcHeld=e.code;rcAction(command);document.querySelector(`[data-rc-action="${command}"]`)?.classList.add('is-keydown')});
 document.addEventListener('keyup',e=>{const command=rcKeys[e.code];if(command)document.querySelector(`[data-rc-action="${command}"]`)?.classList.remove('is-keydown');if(rcHeld===e.code){rcHeld=null;if(engState().body==='运动中')handlers.rcStop()}});
 window.addEventListener('blur',()=>{if(rcHeld){rcHeld=null;handlers.rcStop()}});

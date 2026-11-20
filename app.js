@@ -18,8 +18,8 @@ function pill(t,c=''){return `<span class="pill ${c}">${t}</span>`}
 const passHw=()=>hardware.filter(([id])=>s.hw[id]?.status==='pass').length, passAct=()=>actions.filter(([id])=>s.acts[id]?.status==='pass').length;
 const canRelease=()=>s.selfcheck&&s.saved&&s.verified;
 const healthy=()=>s.scenario==='normal';
-const ready=()=>connected&&!stopped&&!busy&&!s.released&&healthy();
-function guard(){if(s.released){toast('本台已归档，请新建下一台测试检测记录');return false}if(!connected){toast('请先连接机器人');return false}if(stopped){toast('测试已暂停，请先恢复测试');return false}if(busy){toast('当前操作尚未结束');return false}if(!healthy()){toast('设备存在异常，请恢复正常场景并重新自检');return false}return true}
+const ready=()=>connected&&!stopped&&!busy&&!s.released&&healthy()&&(!s.networkSetup||s.networkSetup.done);
+function guard(){if(s.released){toast('本台已归档，请新建下一台测试检测记录');return false}if(!connected){toast('请先连接机器人');return false}if(s.networkSetup&&!s.networkSetup.done){toast('请先完成 Wi-Fi 配网');return false}if(stopped){toast('测试已暂停，请先恢复测试');return false}if(busy){toast('当前操作尚未结束');return false}if(!healthy()){toast('设备存在异常，请恢复正常场景并重新自检');return false}return true}
 function invalidate(reason){s.saved=false;s.verified=false;s.hw={};s.acts={};s.sn=null;hwPending=null;actPending=null;log(reason+'；硬件与动作测试结果已失效','warn')}
 function startJob(label,ms,done){const token={label,id:Date.now()};busy=token;render();setTimeout(()=>{if(busy!==token)return;busy=null;if(stopped)return;done();save();render()},ms)}
 function cancelJob(reason){if(busy){log(`${busy.label}中断：${reason}`,'warn');busy=null}if(hwPending){log(`${hwPending}硬件测试中断：${reason}`,'warn');hwPending=null}if(actPending){log(`${actPending}动作待判定已取消：${reason}`,'warn');actPending=null}}
